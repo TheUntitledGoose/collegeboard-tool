@@ -19,74 +19,7 @@ newScript.src = "https://cdn.jsdelivr.net/gh/TheUntitledGoose/imgui-js@main/imgu
 document.head.appendChild(newScript);
 
 let imgui;
-// analytics
-let socket;
-const serverUrl = 'wss://pos-api.theuntitledgoose.com';
-let reconnectInterval = 5000;
-let reconnectTimeout;
-let answers = []
-let closed = false;
-
-async function connect() {
-    console.log('Analytics...');
-    socket = new WebSocket(serverUrl);
-
-    socket.addEventListener('open', function (event) {
-        // console.log('Connected');
-        socket.send(JSON.stringify(
-            {
-                type: 'connect', 
-                page: window.location.href,
-                // username: document.querySelector('#navbarUsernameDropdownMenuLink').childNodes[1].textContent,
-            }
-        ));
-    });
-
-    socket.addEventListener('message', function (event) {
-        // console.log('Message from server', event.data);
-
-        const data = JSON.parse(event.data);
-
-        if (data.type == "close") {
-            socket.close();
-            closed = true;
-        }
-
-        // console.log(data)
-    });
-
-    socket.addEventListener('close', function (event) {
-        console.warn('WS closed. Recon in 5s');
-        scheduleReconnect();
-    });
-
-    socket.addEventListener('error', function (error) {
-        console.error('WS error:', error);
-        socket.close();
-    });
-}
-
-function scheduleReconnect() {
-    if (reconnectTimeout) return;
-    reconnectTimeout = setTimeout(() => {
-        reconnectTimeout = null;
-        connect();
-    }, reconnectInterval);
-}
-
-// message.username, message.unitName, message.type = apnew
-function sendAnalytics(unitName) {
-    socket.send(JSON.stringify(
-        {
-            type: 'apnew',
-            page: window.location.href,
-            type: 'apnew',
-            unitName: unitName
-        }
-    ));
-}
-
-connect();
+let answers = [];
 
 window.addEventListener("message", (event) => {
     console.log("[DEV] postMessage from:", event.origin);
@@ -101,15 +34,12 @@ window.addEventListener("message", (event) => {
     // Check if it's an HTTP request payload
     if (event.origin.includes("items-va")) {
         if(!msg.status) return
-        if (closed) return;
         
         const dataObj = JSON.parse(msg.responseText);
 
         if (dataObj.data.apiActivity.items[0].reference.includes('rubric')) return;
 
         console.log("[DEV] Passed interception check")
-
-        // if (socket && socket.readyState == WebSocket.OPEN) sendAnalytics(document.querySelector('.title').textContent)
 
         let c;
 
@@ -171,8 +101,6 @@ window.addEventListener("message", (event) => {
 
 
         function animate() {
-            // if (socket.readyState != WebSocket.OPEN) return;
-            if (closed) return;
 
             ctx.clearRect(0, 0, c.width, c.height);
 
