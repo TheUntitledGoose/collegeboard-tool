@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> # End of Life
+
 # AP Classroom Answerer
 **If you looked this up, *shame*.**
 
